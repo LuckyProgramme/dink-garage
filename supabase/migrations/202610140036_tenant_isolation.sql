@@ -63,6 +63,8 @@ $$;
 -- tenant RLS too. Merely adding policies while leaving postgres as their owner
 -- would not isolate them. Clients cannot SET ROLE to this execution identity.
 create role dinkvision_executor nologin nosuperuser nobypassrls;
+grant dinkvision_executor to postgres;
+grant usage, create on schema public to dinkvision_executor;
 grant usage on schema public,auth to dinkvision_executor;
 grant execute on function auth.uid() to dinkvision_executor;
 
