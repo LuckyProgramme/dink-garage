@@ -1,0 +1,13 @@
+Dink Vision Recorder uses JavaCV 1.5.12 and JavaCPP 1.5.12 (Apache 2.0), Bytedeco FFmpeg 7.1.1-1.5.12 non-GPL Android builds (LGPL 3.0), and UVCAndroid 1.0.13 (Apache 2.0) with libusb (LGPL 2.1), libuvc (BSD), libjpeg-turbo, and libyuv. The accompanying GPL text is part of the LGPL license terms, not an indication that the GPL FFmpeg variant is used. Native libraries are dynamically linked. AndroidX uses Apache 2.0.
+Source and build instructions:
+https://github.com/bytedeco/javacv/tree/1.5.12
+https://github.com/bytedeco/javacpp/tree/1.5.12
+https://github.com/bytedeco/javacpp-presets/tree/1.5.12/ffmpeg
+https://github.com/FFmpeg/FFmpeg/tree/n7.1.1
+https://github.com/cisco/openh264
+https://github.com/shiyinghan/UVCAndroid/tree/1.0.13
+https://github.com/libusb/libusb
+https://github.com/libuvc/libuvc
+https://github.com/libjpeg-turbo/libjpeg-turbo
+https://chromium.googlesource.com/libyuv/libyuv/
+The FFmpeg native artifacts include OpenH264 and their bundled third-party dependencies. See upstream source trees for dependency notices. See android/README.md for the Maven coordinates and rebuilding this APK with replacement libraries. No restriction on reverse engineering for debugging changes to LGPL libraries is imposed.

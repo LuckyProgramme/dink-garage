@@ -1,0 +1,111 @@
+plugins { id 'com.android.application' }
+def environment = new Properties()
+def environmentFile = rootProject.file('../.env')
+if (environmentFile.exists()) environmentFile.withInputStream { environment.load(it) }
+def appOrigin = System.getenv('APP_ORIGIN') ?: environment.getProperty('APP_ORIGIN')
+def appVersionName = '0.5.28'
+if (!appOrigin || !(appOrigin ==~ /^https:\/\/[^\/?#]+$/))
+    throw new GradleException('Set APP_ORIGIN to the hosted HTTPS origin in the repository .env or build environment.')
+android {
+    namespace 'com.casabatik.recorder'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'com.casabatik.recorder'
+        minSdk 26
+        targetSdk 36
+        versionCode 34
+        versionName appVersionName
+        buildConfigField 'String', 'APP_ORIGIN', '"' + appOrigin + '"'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        ndk { abiFilters 'arm64-v8a', 'x86_64' }
+    }
+    buildFeatures { buildConfig true }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    packaging { resources { excludes += ['META-INF/DEPENDENCIES', 'META-INF/INDEX.LIST', 'META-INF/native-image/**'] }; jniLibs { useLegacyPackaging = true } }
+}
+configurations { nativeBundles }
+dependencies {
+    implementation 'androidx.activity:activity:1.10.1'
+    implementation 'androidx.webkit:webkit:1.14.0'
+    implementation 'com.herohan:UVCAndroid:1.0.13'
+    implementation('org.bytedeco:javacv:1.5.12') { transitive = false }
+    implementation 'org.bytedeco:javacpp:1.5.12'
+    implementation 'org.bytedeco:ffmpeg:7.1.1-1.5.12'
+    nativeBundles 'org.bytedeco:javacpp:1.5.12:android-arm64'
+    nativeBundles 'org.bytedeco:javacpp:1.5.12:android-x86_64'
+    nativeBundles 'org.bytedeco:ffmpeg:7.1.1-1.5.12:android-arm64'
+    nativeBundles 'org.bytedeco:ffmpeg:7.1.1-1.5.12:android-x86_64'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+}
+def extracted = layout.buildDirectory.dir('native-libraries')
+tasks.register('extractNative', Copy) {
+    from { configurations.nativeBundles.collect { zipTree(it) } }
+    include '**/*.so'
+    eachFile { f ->
+        def abi = f.path.contains('arm64-v8a') ? 'arm64-v8a' : 'x86_64'
+        f.path = abi + '/' + f.name
+    }
+    includeEmptyDirs = false
+    into extracted
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+extensions.getByName('android').sourceSets.main.jniLibs.srcDir(extracted)
+tasks.named('preBuild').configure { dependsOn 'extractNative' }
+
+// Android keeps local copies because packaged apps cannot read Next.js public
+// files at runtime. Refuse to build if any copy differs from the public source.
+def publicBrandLogo = rootProject.file('../public/dink-vision-logo.png')
+def packagedBrandLogos = [
+    file('src/main/assets/dink-vision-logo.png'),
+    file('src/main/res/drawable/dink_vision_logo.png'),
+    file('src/main/assets/wpc-logo.png'),
+    file('src/main/res/drawable/wpc_logo.png')
+]
+tasks.register('verifyBrandLogo') {
+    inputs.file(publicBrandLogo)
+    inputs.files(packagedBrandLogos)
+    doLast {
+        if (!publicBrandLogo.isFile()) throw new GradleException('Missing public/dink-vision-logo.png')
+        byte[] expected = publicBrandLogo.bytes
+        packagedBrandLogos.each { logo ->
+            if (!logo.isFile() || !java.util.Arrays.equals(expected, logo.bytes))
+                throw new GradleException("${logo} must be an exact copy of public/dink-vision-logo.png")
+        }
+    }
+}
+tasks.named('preBuild').configure { dependsOn 'verifyBrandLogo' }
+
+// Keep Android Studio's APK and the named local copies synchronized. The
+// Build APK(s) action runs assembleDebug, so this always exports that exact
+// output instead of leaving an older manually copied APK behind.
+def debugApk = layout.buildDirectory.file('outputs/apk/debug/app-debug.apk')
+def exportedApkName = "Dink-Vision-Recorder-${appVersionName}.apk"
+def exportDebugApk = tasks.register('exportDebugApk') {
+    doNotTrackState('Copies the assembled APK outside the Android Gradle project.')
+    inputs.file(debugApk)
+    doLast {
+        def rootCopy = rootProject.file("../${exportedApkName}")
+        def artifactCopy = rootProject.file("../artifacts/${exportedApkName}")
+        artifactCopy.parentFile.mkdirs()
+        java.nio.file.Files.copy(
+            debugApk.get().asFile.toPath(),
+            rootCopy.toPath(),
+            java.nio.file.StandardCopyOption.REPLACE_EXISTING
+        )
+        java.nio.file.Files.copy(
+            debugApk.get().asFile.toPath(),
+            artifactCopy.toPath(),
+            java.nio.file.StandardCopyOption.REPLACE_EXISTING
+        )
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        rootCopy.eachByte(8192) { buffer, count -> digest.update(buffer, 0, count) }
+        def checksum = digest.digest().encodeHex().toString()
+        rootProject.file("../artifacts/${exportedApkName}.sha256").text =
+            "${checksum}  ${exportedApkName}\n"
+        println "Latest debug APK: ${rootCopy}"
+    }
+}
+tasks.configureEach {
+    if (name == 'assembleDebug') finalizedBy(exportDebugApk)
+}

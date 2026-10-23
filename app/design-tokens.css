@@ -1,0 +1,103 @@
+:root {
+  /* Brand palette (aliases the base tokens defined in globals.css) */
+  --color-bg: var(--paper);
+  --color-surface: #fffefb;
+  --color-text: var(--ink);
+  --color-text-muted: var(--muted);
+  --color-border: var(--line);
+  --color-accent: var(--teal);
+  --color-accent-strong: #10565a;
+  --color-cream: var(--cream);
+
+  /* Status colors */
+  --color-danger: #a13c30;
+  --color-danger-strong: #7f3029;
+  --color-danger-border: #c98d85;
+  --color-danger-bg: #faece9;
+  --color-success: #0b5b51;
+  --color-success-bg: #dfeade;
+  --color-success-chip-bg: #dcecdf;
+  --color-success-chip-text: #2e654a;
+  --color-success-chip-border: #bad5c1;
+  --color-success-chip-dot: #3c8b5d;
+  --color-chip-neutral: #eceee7;
+
+  /* Component tokens */
+  --field-border: #cdd7c7;
+  --field-radius: var(--radius-sm);
+
+  /* Surface / border scale */
+  --color-white: #fff;
+  --color-surface-warm: #fafbf7;
+  --color-surface-cream: #fffefa;
+  --color-surface-page: #fefefb;
+  --color-surface-green: #f5f7f0;
+  --color-border-muted: #c5d0bd;
+  --color-border-green: #dfe5d5;
+  --color-border-soft: #d6dcd4;
+  --color-border-input-alt: #cddbd3;
+
+  /* Focus ring — gold for controls that may sit on accent surfaces,
+     teal for form fields on light surfaces (stronger contrast). */
+  --focus-ring-color: #bc923d;
+  --focus-ring-color-strong: #0f5c62;
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 5px;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Radius scale */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-pill: 999px;
+
+  /* Type scale */
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-md: 16px;
+  --text-lg: 20px;
+  --text-xl: 26px;
+  --text-2xl: 35px;
+  --text-hero: 76px;
+
+  /* Line heights */
+  --leading-tight: 1.15;
+  --leading-snug: 1.3;
+  --leading-normal: 1.7;
+
+  /* Elevation */
+  --shadow-sm: 0 5px 14px #0f5c6218;
+  --shadow-md: 0 12px 40px rgb(14 42 43 / 12%);
+  --shadow-lg: 0 24px 70px rgb(14 42 43 / 24%);
+
+  /* Overlay */
+  --color-overlay: rgb(14 42 43 / 48%);
+  --overlay-blur: 3px;
+
+  /* Motion */
+  --transition-fast: 0.15s;
+  --transition-base: 0.2s;
+
+  /* Layering */
+  --z-modal: 1000;
+
+  /* Breakpoints (documentation only; CSS vars cannot be used in media queries)
+     --bp-sm: 600px
+     --bp-md: 760px
+     --bp-lg: 1050px
+     --bp-xl: 1500px */
+}
